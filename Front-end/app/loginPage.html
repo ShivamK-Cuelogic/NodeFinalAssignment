@@ -1,0 +1,86 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+        function signin(event) {
+            event.preventDefault();
+            var username = $('#username').val();
+            var password = $('#password').val();
+            $.ajax({
+                url: "http://localhost:3000/signin",
+                method: "POST",
+                data: {
+                    username: username,
+                    password: password
+                },  
+                success: function (result) {
+                    console.log("result===>",result);
+                    if((result.success == true || result.success == 'true') && result.token != null) {
+                        localStorage.setItem(username+'_token',result.token);
+                        localStorage.setItem('username',username);
+                        if(result.isAdmin == false) {
+                            window.location.replace('/app/homepageUser.html');
+                        } else {
+                            window.location.replace('/app/homepageAdmin.html');
+                        }
+                        
+                    }
+                    $('#message').css('display', 'block');
+                    $('#message').text(result.message);
+                    
+                }
+            });
+        }
+        function goToSignupPage() {
+            console.log('new')
+            window.location.replace('/app');
+        }
+    </script>
+    <style>
+        .messageCss {
+            display: none;
+            margin: 61px 776px 0px 10px;
+            font-size: 14px;
+            background-color: yellow;
+            padding: 4px 5px 6px 95px;
+        }
+    </style>
+    </head>
+
+    <body>
+        <div id='loginPage'>
+            <div class="container">
+                <div id='message' class="messageCss">
+                            
+                </div>
+                <form id='loginForm' method="post">
+                    <br><br><br><br><br><br>
+                    <h2>Login Page </h2>
+                    <br>
+                    <div class="form-group row">
+                        <div class="col-xs-4">
+                            <label for="username">Username</label>
+                            <input type="text" class="form-control" id="username" name="username">
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-xs-4">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" name="loginPasswd">
+                        </div>
+                    </div>
+                    <br>
+                    <div class="col-xs-4">
+                        <button class="btn btn-success" onclick="signin(event);">&ensp;&ensp;&ensp;&ensp;Log In&ensp;&ensp;&ensp;&ensp;</button>
+                        <a class="btn btn-primary"  onclick="goToSignupPage();">&ensp;&ensp;&ensp;&ensp;Sign Up&ensp;&ensp;&ensp;&ensp;</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </body>
+
+</html>

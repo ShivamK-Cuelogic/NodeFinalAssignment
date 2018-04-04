@@ -1,0 +1,85 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script> 
+        <script>
+            function signup(event) {
+                event.preventDefault();
+                var firstName = $('#firstName').val();
+                var lastName = $('#lastName').val();
+                var username = $('#username').val();
+                var password = $('#password').val();
+                $.ajax({
+                url : "http://localhost:3000/signup",
+                method : "POST",
+                data : {
+                    firstName : firstName,
+                    lastName : lastName,
+                    username : username,
+                    password : password
+                },
+                success : function(result) {
+                    $('#message').css('display','block');
+                    $('#message').text(result.message);
+                }
+            });
+            }
+        </script>
+        <style>
+        .messageCss {
+            display: none;
+            margin: 61px 576px 0px 10px;
+            font-size: 14px;
+            background-color: yellow;
+            padding: 4px 5px 6px 200px;
+        }
+        </style>
+    </head>
+
+    <body>
+        
+        <div id='registrationPage' >
+
+            <div class="container">
+                <div id='message' class="messageCss">
+                            
+                </div>
+                <form id='registrationForm' method="post">
+                    <h1>Registration Form</h1>
+                    <div class="form-group row">
+                            <div class="col-xs-3">
+                              <label for="firstName">First Name</label><label for="firstName" id="requiredFirstName" style="color:red" hidden=true>*required</label>
+                              <input class="form-control" id="firstName" name="firstName" type="text">
+                            </div>
+                            <div class="col-xs-3">
+                                  <label for="lastName">Last Name</label><label for="lastName" id="requiredLastName" style="color:red" hidden=true>*required</label>
+                                  <input class="form-control" name="lastName" id="lastName" type="text">
+                            </div>
+                    </div>
+                    <div class="form-group row">
+                            <div class="col-xs-6">
+                                <label for="username">username</label><label for="username" id="requiredusername" style="color:red" hidden=true>*required</label><label for="username" hidden=true id="invalidusername" style="color:red">*Invalid username</label>
+                                <input type="text" name="username" class="form-control" id="username">
+                            </div>
+                    </div>
+                    <div class="form-group row">
+                            <div class="col-xs-6">
+                                <label for="password">Password</label><label for="password" id="requiredPassword" style="color:red" hidden=true>*required</label><label for="password" hidden=true id="passwordDoesNotMatch" style="color:red">*password does not match</label>
+                                <input type="password" class="form-control" id="password" name="password">
+                            </div>
+                    </div>
+                    
+                    <br>
+                    <div class="form-group row">
+                        <button class="btn btn-success btn-md" onclick="signup(event);"> &ensp;&ensp;Register&ensp;&ensp;</button>
+                        <!-- <button class="btn btn-primary btn-md" type='button' >&ensp;&ensp;&ensp;Clear&ensp;&ensp;&ensp;</button> -->
+                    </div>
+                    <h5>already registered??<a href='loginPage.html' onclick=''>Click</a> here to Login</h5> 
+                </form>
+            </div>
+        </div>
+    </body>
+
+</html> 

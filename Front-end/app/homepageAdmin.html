@@ -1,0 +1,187 @@
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+        $(document).ready(function () {
+            console.log('===>', localStorage.getItem('username'));
+            if (localStorage.getItem('username') != null) {
+                var username = localStorage.getItem('username');
+                $.ajax({
+                    url: "http://localhost:3000/admin/getAllUsers",
+                    method: "POST",
+                    data: {
+                        username: username,
+                        authToken: localStorage.getItem(username + '_token')
+                    },
+                    success: function (result) {
+                        var tableRow;
+                        result.data.forEach(function(element) {
+                            tableRow += "<tr id ='tr_" + element._id + "'><td class='info' contenteditable ='false' id= 'username_" + element._id +"'>" + element.username + "</td>" + "<td class='info' contenteditable ='false' id='firstName_" +element._id + "'>" + element.firstName + "</td>" + "<td class='info' contenteditable ='false' id='lastName_" + element._id + "'>" + element.lastName + "</td>" + "<td> <a href='#' id='edit_" +element._id + "' onclick ='editUser(event);'> Edit </a> <span id = 'btnSave_" + element._id + "' style='display:none'  onclick='saveFields(event);'  class='btn btn-info btn-md'> Save </span> </td>" +"<td> <a href='#' id='del_" +element._id + "' onclick ='deleteUser(event);'> Delete </a> </td></tr>";                         
+                        }, this);
+                        $('#usersTable').append(tableRow);
+                        $('#userWhologgedin').text(localStorage.getItem('username'));
+                    }
+                })
+            } else {
+                alert('please signin');
+                window.location.replace('/app/loginPage.html');
+            }
+        });
+
+        function saveFields(event) {
+                $('.info').attr('contenteditable',false);
+                $('#' + event.target.id).css('display','none');
+                var objectId = (event.target.id).split("_")[1];
+                $('#edit_' + objectId).css('display','inline');
+                
+                var firstName = $('#firstName_'+objectId).text();
+                var lastName = $('#lastName_'+objectId).text();
+                $.ajax({
+                    url: "http://localhost:3000/user/updateInfo",
+                    method: "POST",
+                    data : {
+                        firstName : firstName ,
+                        lastName : lastName ,
+                        objectId : objectId
+                    },
+                    success : function(result) {
+                        if(result.success == true) {
+                            $('#message').text(result.message);
+                        }
+                    }
+                });                
+            }
+        
+
+        function editUser(event) {
+            $('.info').attr('contenteditable',true);
+            var objectId = (event.target.id).split("_")[1];
+            $('#'+event.target.id).css('display','none');
+            $('#btnSave_' + objectId).css('display','block');
+        } 
+        
+
+        function deleteUser(event) {
+            event.preventDefault();
+            var objectId = (event.target.id).split("_")[1];
+            
+            $.ajax({
+                url : "http://localhost:3000/admin/deleteUser",
+                method : "POST",
+                data : {
+                    objectId : objectId
+                },
+                success : function(result) {
+                    if(result.success) {
+                        //$('table#userTable tr#tr_'+objectId).remove();
+                        $('#tr_'+objectId).css('display','none');
+                        $('#message').text(result.message);
+                    }
+                }
+            })
+        }
+
+        function search() {
+            var searchText = $('#txtSearch').val();
+            var username = localStorage.getItem('username');
+            var authToken = localStorage.getItem(username + '_token');
+            $('#searchResult').css('display','block');
+            $('#usersTable').remove();
+            $.ajax({
+                url : "http://localhost:3000/admin/search",
+                method : "POST",
+                data : {
+                    username : username ,
+                    searchText : searchText ,
+                    authToken : authToken
+                } ,
+                success : function(result) {
+                    if (result.success == true && result.data.length > 0) {
+                        var tableRow ;
+                        result.data.forEach(function(element) {
+                            tableRow += "<tr id ='tr_" + element._id + "'><td class='info' contenteditable ='false' id= 'username_" + element._id +"'>" + element.username + "</td>" + "<td class='info' contenteditable ='false' id='firstName_" +element._id + "'>" + element.firstName + "</td>" + "<td class='info' contenteditable ='false' id='lastName_" + element._id + "'>" + element.lastName + "</td>" + "<td> <a href='#' id='edit_" +element._id + "' onclick ='editUser(event);'> Edit </a> <span id = 'btnSave_" + element._id + "' style='display:none'  onclick='saveFields(event);'  class='btn btn-info btn-md'> Save </span> </td>" +"<td> <a href='#' id='del_" +element._id + "' onclick ='deleteUser(event);'> Delete </a> </td></tr>";                         
+                        }, this);  
+
+                        $('#searchUsersTable').append(tableRow);
+
+                    } else {
+
+                        $('#message').text('No search result found !!');
+                    }
+                }
+            })
+
+        }
+
+        function logout() {
+                localStorage.clear();
+                window.location.replace('/app/loginPage.html');
+        }
+    </script>
+    <style>
+        #pageBody {
+            margin-left: 69px;
+            margin-top: 30px;
+            font-size: 25px;
+        }
+        #usersTable th,td {
+            padding: 20px;
+        }
+
+        #searchUsersTable th,td {
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div id="intro" style="margin-top: 10px;" class="pull-right">
+            <ul class="list-inline">
+                <li><span><i><span id='userWhologgedin'>Shivam Kubde</span></i>
+                    </span>
+                </li>
+                <li><span onclick="logout();" class="btn btn-info btn-md"><span class="glyphicon glyphicon-log-out"></span>Logout</span>
+                </li>
+            </ul>
+        </div>
+        <div id='userslist' style="margin-top: 120px;">
+            <div id='message' style="font-size: 12px;">
+                        
+            </div>
+            <div id='searchBox' style="margin-left: 20px;">
+                <input type='text' placeholder="search by username" id='txtSearch'> <input type="submit" value="Search" onclick="search();">
+            </div><br><br>
+            <div id='searchResult' style = "display:none">
+                <table id='searchUsersTable'>
+                    <tr>
+                        <th> Username </th>
+                        <th> firstName </th>
+                        <th> lastName </th>
+                        <th> Edit </th>
+                        <th> Delete </th>
+                    </tr>
+                </table><br>
+            </div>
+            <br>
+            <table id='usersTable'>
+                <tr>
+                    <th> Username </th>
+                    <th> firstName </th>
+                    <th> lastName </th>
+                    <th> Edit </th>
+                    <th> Delete </th>
+                </tr>
+            </table><br>
+            <div> <a href="/app/usersActivity.html">Click here to get users activity details</a></div>
+        </div>
+        
+    </div>
+</body>
+
+
+</html>

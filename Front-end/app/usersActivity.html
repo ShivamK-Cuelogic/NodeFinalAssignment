@@ -1,0 +1,98 @@
+<html>
+        
+        <head>
+            <meta name="viewport" content="width=device-width, initial-scale=1">
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+            <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+            <script>
+                $(document).ready(function () {
+                    console.log('===>', localStorage.getItem('username'));
+                    if (localStorage.getItem('username') != null) {
+                        var username = localStorage.getItem('username');
+                        $.ajax({
+                            url: "http://localhost:3000/admin/usersActivity",
+                            method: "POST",
+                            data: {
+                                username: username,
+                                authToken: localStorage.getItem(username + '_token')
+                            },
+                            success: function (result) {
+                                console.log('====>',result);
+                                var tableRow;
+                                result.data.forEach(function(element) {
+                                    tableRow += "<tr><td>" + element.username + "</td>" + "<td> " +element.browser+ " </td>"+"<td>" + element.date + "</td></tr>";                         
+                                }, this);
+                                $('#usersActivityTable').append(tableRow);
+                                $('#userWhologgedin').text(localStorage.getItem('username'));
+                            }
+                        })
+                    } else {
+                        alert('please signin');
+                        window.location.replace('/app/loginPage.html');
+                    }
+            });
+            function logout() {
+                localStorage.clear();
+                window.location.replace('/app/loginPage.html');
+            }
+
+            function getUsersNotLogged() {
+                var username = localStorage.getItem('username');
+                $.ajax({
+                    url: "http://localhost:3000/admin/usersNotLogged",
+                    method: "POST",
+                    data: {
+                         username: username,
+                        authToken: localStorage.getItem(username + '_token')
+                    },
+                    success: function (result) {
+                        console.log('====>',result);
+                        var tableRow;
+                        result.data.forEach(function(element) {
+                            tableRow += "<tr><td>" + element.username + "</td> <tr>";                        
+                        }, this);
+                        $('#usersActivitylist').css('display','none');
+                        $('#usernames').css('display','block');
+                        $('#usernames').append(tableRow);
+                        $('#userWhologgedin').text(localStorage.getItem('username'));
+                    }
+                })
+            }
+        </script>
+        <style>
+            #usersActivityTable th,td {
+                padding: 15px 0px 0px 80px;
+            }
+        </style>
+    </head> 
+    <body>
+            <div class="container">
+                    <div id="intro" style="margin-top: 10px;" class="pull-right">
+                            <ul class="list-inline">
+                              <li><span ><i><span id='userWhologgedin'></span></i></span></li>
+                              <li><span onclick="logout();" class="btn btn-info btn-md"><span class="glyphicon glyphicon-log-out"></span>Logout</span></li>
+                            </ul>
+                    </div>
+
+                    <div id='usersActivitylist' style="margin-top: 80px;">
+                        <a href="#" onclick="getUsersNotLogged();">get users who have not logged since 5 days</a>        
+                            <table id='usersActivityTable'>
+                                <tr>
+                                    <th> Username </th>
+                                    <th> Browser </th>
+                                    <th> Date </th>
+                                </tr>
+                            </table><br>
+                    </div>
+
+                    <div>
+                        <table id ='usernames' style="display:none">
+                            <tr>
+                                <th>Username</th>
+                            </tr>
+                        </table>
+                    </div>
+            </div>
+    </body>
+</html>   

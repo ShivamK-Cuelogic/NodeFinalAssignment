@@ -1,0 +1,102 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+        <script>
+            $(document).ready(function() {
+                console.log('===>',localStorage.getItem('username'));
+                if(localStorage.getItem('username') != null) {
+                    var username = localStorage.getItem('username');
+                    $.ajax({
+                        url: "http://localhost:3000/user/details",
+                        method: "POST",
+                        data : {
+                            username: username,
+                            authToken : localStorage.getItem(username+'_token')
+                        },
+                        success : function(result) {
+                            if(result.success == true) {
+                                $('#userWhologgedin').text(result.data.username);
+                                $('#firstName').text(result.data.firstName);
+                                $('#lastName').text(result.data.lastName);
+                                $('#objectId').val(result.data._id);
+                            }
+                        }
+                    })  
+                } else {
+                    alert('please signin');
+                    window.location.replace('/app/loginPage.html');
+                }
+                
+
+            });
+
+            function editFields() {
+                $('.info').attr('contenteditable',true);
+                $('#editIcon').css('display','none');
+                $('#btnSave').css('display','inline');
+            }
+
+            function saveFields() {
+                $('.info').attr('contenteditable',false);
+                $('#editIcon').css('display','inline');
+                $('#btnSave').css('display','none');
+                var firstName = $('#firstName').text();
+                var lastName = $('#lastName').text();
+                var objectId = $('#objectId').val();
+                $.ajax({
+                    url: "http://localhost:3000/user/updateInfo",
+                    method: "POST",
+                    data : {
+                        firstName : firstName ,
+                        lastName : lastName ,
+                        objectId : objectId
+                    },
+                    success : function(result) {
+                        if(result.success == true) {
+                            $('#message').text(result.message);
+                        }
+                    }
+                });                
+            }
+
+            function logout() {
+                localStorage.clear();
+                window.location.replace('/app/loginPage.html');
+            }
+        </script>
+        <style>
+        #pageBody {
+            margin-left: 69px;
+            margin-top: 30px;
+            font-size: 25px;
+        }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div id="intro" style="margin-top: 10px;" class="pull-right">
+              <ul class="list-inline">
+                <li><span ><i><span id='userWhologgedin'></span></i></span></li>
+                <li><span onclick="logout();" class="btn btn-info btn-md"><span class="glyphicon glyphicon-log-out"></span>Logout</span></li>
+              </ul>
+            </div>
+        </div>
+
+        <div id='pageBody'>
+            <div id='message' style="font-size: 12px;">
+
+            </div>
+            <div id='content'>
+                firstName : <span class = 'info' id ='firstName' contenteditable="false">Shivam M Kubde</span>
+                lastName : <span class = 'info'  id ='lastName' contenteditable="false" style="margin-left: 60px;">Shom</span>
+                <span style="margin-left: 60px;" id='editIcon' onclick="editFields();" class="glyphicon glyphicon-pencil"></span>
+                <span id = 'btnSave' style="display:none"  onclick="saveFields();"  class="btn btn-info btn-md"> Save </span>
+                <span><input type="hidden" id='objectId'></span>
+            </div>
+        </div>
+          
+    </body>
+</html>
