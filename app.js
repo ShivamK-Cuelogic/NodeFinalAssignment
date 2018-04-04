@@ -1,7 +1,11 @@
+var Promise = require("bluebird");
 var express = require("express");
+var boom = require('express-boom');
 var morgan = require("morgan");
-var mongoose = require("mongoose");
+var mongoose = Promise.promisifyAll(require("mongoose"));
 const bodyParser = require("body-parser");
+
+
 var fs = require("fs");
 var allRoutes = require("./routes/allRoutes.js");
 require('dotenv').config();
@@ -22,6 +26,11 @@ app.use(function(req, res, next) {
     next();
 });
 app.use(morgan('dev'));
+app.use(boom());
+
+app.use((req,res) => {
+    req.json({ status : 'Requested resource not available'});
+})
 
 allRoutes(app);
 

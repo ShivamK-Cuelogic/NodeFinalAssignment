@@ -9,9 +9,9 @@ module.exports = {
     signinController : function(req,res) {
         var password = req.body.password;
         var username = req.body.username;
-        userModel.findOne({username : username },function(err,queryResult) {
-            if (err) throw err ;
-            console.log('queryresult===>',queryResult);
+        userModel.findOne({username : username })
+        .then((queryResult) => {
+            
             if( queryResult != null) {
 
                 if(bcrypt.compareSync(password,queryResult.password) || queryResult.password == password) {
@@ -30,6 +30,10 @@ module.exports = {
                 res.json({ success : false , message : 'username or password is incorrect'});
             }
         })
+        .catch((err) => {
+            console.log("err==>",err);
+            res.boom.serverUnavailabe('Sorry request cannot be processed.. plz try again later')
+        })
     } ,
 
 
@@ -45,22 +49,28 @@ module.exports = {
             isAdmin : false
         });
         userData.password = userData.generateHash(password);
-        userData.save(function(err) {
-            if (err) {
-                throw err ;
-                res.json({success : false ,message : 'data not saved'});
-            }
-            else {
-                res.json({success : true ,message : 'data saved successfully'});
-            }
+        userData.save()
+        .then(()=> {
+            res.json({success : true ,message : 'data saved successfully'});
         })
+        .catch((err) => {
+            console.log("err==>",err);
+            res.boom.serverUnavailabe('Sorry request cannot be processed.. plz try again later')
+        })
+        
     },
 
     userDetailsController : function(req,res) {
         var username = req.body.username;
-        userModel.findOne({ username : username},function(err,result) {
+        userModel.findOne({ username : username})
+        .then(function(result) {
             console.log('result===>',result);
             res.json({success : true , data : result});
+        })
+        .catch(err => {
+            console.log("err==>",err);
+            res.boom.serverUnavailabe('Sorry request cannot be processed.. plz try again later');
+
         })
     } ,
 
@@ -73,43 +83,63 @@ module.exports = {
                 firstName : firstName,
                 lastName : lastName
             }
-         },{new : true} ,function(err,result) {
-             if (err) throw err;
+         },{new : true} )
+         .then(function(err,result) {
              console.log('result===>');
              res.json({success:true , message : 'user info updated successfully'});
 
          })
+         .catch(err => {
+            console.log("err==>",err);
+            res.boom.serverUnavailabe('Sorry request cannot be processed.. plz try again later');
+
+        })
     },
 
     getAllUsersController : function(req,res) {
-        userModel.find({isAdmin : false},function(err,queryResult) {
-            if(err) throw err;
+        userModel.find({isAdmin : false})
+        .then(function(queryResult) {
             console.log("queryres===>",queryResult);
             res.json({ success : true , data : queryResult});
-        });
+        })
+        .catch(err => {
+            console.log("err==>",err);
+            res.boom.serverUnavailabe('Sorry request cannot be processed.. plz try again later');
+
+        })
     },
 
     deleteUserController : function(req,res) {
         var objectId = req.body.objectId;
-        userModel.findByIdAndRemove(objectId ,function(err,result) {
-            if(err) throw err;
+        userModel.findByIdAndRemove(objectId )
+        .then(function(result) {
             res.json({ success : true , message : 'user deleted successfully'});
+        })
+        .catch(err => {
+            console.log("err==>",err);
+            res.boom.serverUnavailabe('Sorry request cannot be processed.. plz try again later');
+
         })
     },
 
     getUsersActivityController : function(req,res) {
-        userActivityModel.find({},function(err,result) {
-            if(err) throw err;
+        userActivityModel.find({})
+        .then(function(result) {
             console.log("usersactivity===>",result);
             res.json({success: true , data : result});
+        })
+        .catch(err => {
+            console.log("err==>",err);
+            res.boom.serverUnavailabe('Sorry request cannot be processed.. plz try again later');
+
         })
     },
 
     usersNotLoggedController : function(req,res) {
-        userActivityModel.find({},function(err,queryResult) {
+        userActivityModel.find({})
+        .then(function(queryResult) {
             var currentTimestamp = moment().format('x');
             var result = [];
-            if(err) throw err ;
             queryResult.forEach(function(record) {
                 var ts = parseInt(record.timestamp);
                 if ((currentTimestamp-ts) > 432000000) {
@@ -120,17 +150,26 @@ module.exports = {
             console.log("result===>",result) 
             res.json({ success : true , data : result});
         })
+        .catch(err => {
+            console.log("err==>",err);
+            res.boom.serverUnavailabe('Sorry request cannot be processed.. plz try again later');
+
+        })
     } ,
 
 
     searchController : function(req,res) {
-        
+
         var searchText = req.body.searchText;
-        userModel.find({username : searchText},function(err,result) {
-            if(err) throw err;
+        userModel.find({username : searchText})
+        .then(function(result) {
             console.log("search result===>",result);
             res.json({ success : true , data : result });
-        }) 
+        })
+        .catch(err => {
+            console.log("err==>",err);
+            res.boom.serverUnavailabe('Sorry request cannot be processed.. plz try again later');
+        })
     }
 
 }
